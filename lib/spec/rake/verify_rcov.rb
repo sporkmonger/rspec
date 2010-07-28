@@ -37,11 +37,16 @@ module RCov
       task @name do
         total_coverage = 0
 
-        File.open(index_html).each_line do |line|
-          if line =~ /<tt class='coverage_total'>\s*(\d+\.\d+)%\s*<\/tt>/
-            total_coverage = $1.to_f
-            break
+        # If there's no coverage file, coverage is zero
+        if File.exist?(index_html)
+          File.open(index_html).each_line do |line|
+            if line =~ /<tt class='coverage_total'>\s*(\d+\.\d+)%\s*<\/tt>/
+              total_coverage = $1.to_f
+              break
+            end
           end
+        else
+          warn("No such file or directory - #{index_html}")
         end
         puts "Coverage: #{total_coverage}% (threshold: #{threshold}%)" if verbose
         raise "Coverage must be at least #{threshold}% but was #{total_coverage}%" if total_coverage < threshold
